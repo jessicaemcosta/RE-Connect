@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RE Connect — Investor Deck</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --card: #12121a;
+    --border: #1e1e2e;
+    --text: #ffffff;
+    --muted: #8888aa;
+    --purple: #7B35E8;
+    --blue: #4DA6FF;
+    --pink: #E8355A;
+    --orange: #E8720C;
+    --grad: linear-gradient(135deg, #E8355A 0%, #9B27D8 40%, #4DA6FF 100%);
+    --grad-subtle: linear-gradient(135deg, rgba(123,53,232,0.15) 0%, rgba(77,166,255,0.08) 100%);
+  }
+
+  html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: var(--text); }
+
+  .deck { width: 100vw; height: 100vh; position: relative; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    padding: 60px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.5s ease;
+  }
+  .slide.active { opacity: 1; pointer-events: all; }
+
+  .slide-inner { width: 100%; max-width: 960px; }
+
+  /* NAV */
+  .nav {
+    position: fixed; bottom: 32px; right: 40px; z-index: 100;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .nav-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .nav-btn:hover { background: var(--purple); border-color: var(--purple); }
+  .counter { font-size: 13px; color: var(--muted); letter-spacing: 0.05em; }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    position: fixed; top: 0; left: 0; height: 3px;
+    background: var(--grad); transition: width 0.4s ease;
+    z-index: 100;
+  }
+
+  /* ─── SLIDE 1: TITLE ─── */
+  #s1 { background: var(--bg); }
+  #s1 .logo-mark {
+    width: 80px; height: 80px; border-radius: 18px;
+    background: var(--grad); margin-bottom: 32px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px; font-weight: 900; color: white;
+    box-shadow: 0 0 60px rgba(123,53,232,0.5);
+  }
+  #s1 h1 {
+    font-size: 72px; font-weight: 800; letter-spacing: -2px;
+    background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; line-height: 1.05; margin-bottom: 20px;
+  }
+  #s1 .tagline { font-size: 26px; color: var(--muted); font-weight: 300; margin-bottom: 48px; }
+  #s1 .badges { display: flex; gap: 12px; flex-wrap: wrap; }
+  #s1 .badge {
+    padding: 8px 20px; border-radius: 40px; font-size: 13px; font-weight: 600;
+    border: 1px solid var(--border); color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  #s1 .badge.hot { background: rgba(123,53,232,0.15); border-color: var(--purple); color: var(--purple); }
+
+  /* ─── SLIDE 2: PROBLEM ─── */
+  #s2 .section-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--orange); margin-bottom: 16px; font-weight: 600; }
+  #s2 h2 { font-size: 52px; font-weight: 800; margin-bottom: 48px; letter-spacing: -1px; }
+  #s2 h2 span { color: var(--orange); }
+  .pain-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .pain-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 28px; position: relative; overflow: hidden;
+  }
+  .pain-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--pink), transparent);
+  }
+  .pain-card .pain-icon { font-size: 32px; margin-bottom: 14px; display: block; }
+  .pain-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .pain-card p { font-size: 15px; color: var(--muted); line-height: 1.6; }
+
+  /* ─── SLIDE 3: SOLUTION ─── */
+  #s3 { background: var(--bg); }
+  #s3 .section-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--purple); margin-bottom: 16px; font-weight: 600; }
+  #s3 h2 { font-size: 52px; font-weight: 800; margin-bottom: 12px; letter-spacing: -1px; }
+  #s3 .sub { font-size: 20px; color: var(--muted); margin-bottom: 44px; }
+  .feat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .feat-card {
+    background: var(--grad-subtle); border: 1px solid rgba(123,53,232,0.2); border-radius: 16px;
+    padding: 24px; text-align: center;
+  }
+  .feat-card .feat-icon { font-size: 36px; margin-bottom: 12px; display: block; }
+  .feat-card h4 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .feat-card p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* ─── SLIDE 4: HOW IT WORKS ─── */
+  #s4 .section-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--blue); margin-bottom: 16px; font-weight: 600; }
+  #s4 h2 { font-size: 52px; font-weight: 800; margin-bottom: 44px; letter-spacing: -1px; }
+  .step-flow { display: flex; align-items: flex-start; gap: 0; }
+  .step-item { flex: 1; text-align: center; position: relative; }
+  .step-item:not(:last-child)::after {
+    content: '→'; position: absolute; right: -12px; top: 18px;
+    font-size: 24px; color: var(--purple); z-index: 1;
+  }
+  .step-num {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--grad); display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 800; margin: 0 auto 14px;
+    box-shadow: 0 0 20px rgba(123,53,232,0.4);
+  }
+  .step-item h4 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .step-item p { font-size: 13px; color: var(--muted); line-height: 1.5; padding: 0 8px; }
+
+  /* ─── SLIDE 5: MARKET ─── */
+  #s5 .section-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--orange); margin-bottom: 16px; font-weight: 600; }
+  #s5 h2 { font-size: 52px; font-weight: 800; margin-bottom: 44px; letter-spacing: -1px; }
+  .market-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: center; }
+  .big-stat { text-align: center; }
+  .big-stat .num {
+    font-size: 96px; font-weight: 900; line-height: 1;
+    background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .big-stat .label { font-size: 18px; color: var(--muted); margin-top: 12px; }
+  .market-points { display: flex; flex-direction: column; gap: 16px; }
+  .market-point {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px 24px; display: flex; align-items: flex-start; gap: 16px;
+  }
+  .market-point .mp-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+  .market-point h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .market-point p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* ─── SLIDE 6: BUSINESS MODEL ─── */
+  #s6 .section-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--purple); margin-bottom: 16px; font-weight: 600; }
+  #s6 h2 { font-size: 52px; font-weight: 800; margin-bottom: 44px; letter-spacing: -1px; }
+  .model-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .model-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px;
+  }
+  .model-card .mc-icon { font-size: 40px; margin-bottom: 16px; display: block; }
+  .model-card h3 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+  .model-card .mc-price { font-size: 36px; font-weight: 900; color: var(--purple); margin-bottom: 8px; }
+  .model-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* ─── SLIDE 7: Y1 FINANCIALS ─── */
+  #s7 .section-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--orange); margin-bottom: 16px; font-weight: 600; }
+  #s7 h2 { font-size: 52px; font-weight: 800; margin-bottom: 10px; letter-spacing: -1px; }
+  #s7 .year-sub { font-size: 18px; color: var(--muted); margin-bottom: 36px; }
+  .fin-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .fin-box {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 22px 16px; text-align: center;
+  }
+  .fin-box.highlight { border-color: var(--purple); background: rgba(123,53,232,0.1); }
+  .fin-box .fb-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 10px; }
+  .fin-box .fb-val { font-size: 26px; font-weight: 800; }
+  .fin-box.highlight .fb-val { color: var(--purple); }
+  .fin-breakdown {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 28px;
+    display: flex; gap: 32px; align-items: center;
+  }
+  .fin-breakdown .fb-item { flex: 1; text-align: center; }
+  .fin-breakdown .fbi-label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .fin-breakdown .fbi-val { font-size: 18px; font-weight: 700; }
+  .fin-divider { width: 1px; background: var(--border); height: 40px; }
+
+  /* ─── SLIDE 8: Y2 FINANCIALS ─── */
+  #s8 .section-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--blue); margin-bottom: 16px; font-weight: 600; }
+  #s8 h2 { font-size: 52px; font-weight: 800; margin-bottom: 10px; letter-spacing: -1px; }
+  #s8 .year-sub { font-size: 18px; color: var(--muted); margin-bottom: 36px; }
+  .y2-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .y2-left { display: flex; flex-direction: column; gap: 16px; }
+  .y2-stat {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px 24px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .y2-stat .ys-label { font-size: 14px; color: var(--muted); }
+  .y2-stat .ys-val { font-size: 22px; font-weight: 800; }
+  .y2-stat.green .ys-val { color: #22c55e; }
+  .y2-right {
+    background: var(--grad-subtle); border: 1px solid rgba(123,53,232,0.3); border-radius: 16px;
+    padding: 32px; display: flex; flex-direction: column; justify-content: center; gap: 20px;
+  }
+  .y2-right h3 { font-size: 18px; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
+  .val-row { display: flex; justify-content: space-between; align-items: center; }
+  .val-row .vr-x { font-size: 14px; color: var(--muted); }
+  .val-row .vr-val { font-size: 28px; font-weight: 900; color: var(--purple); }
+
+  /* ─── SLIDE 9: GROWTH ─── */
+  #s9 .section-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--purple); margin-bottom: 16px; font-weight: 600; }
+  #s9 h2 { font-size: 52px; font-weight: 800; margin-bottom: 36px; letter-spacing: -1px; }
+  .timeline-wrap { position: relative; margin-bottom: 36px; }
+  .timeline-line {
+    position: absolute; top: 20px; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--pink), var(--purple), var(--blue));
+    border-radius: 2px;
+  }
+  .timeline-nodes { display: flex; justify-content: space-between; position: relative; z-index: 1; padding-bottom: 52px; }
+  .tnode { text-align: center; flex: 1; }
+  .tnode-dot {
+    width: 16px; height: 16px; border-radius: 50%; margin: 12px auto 10px;
+    background: var(--purple); border: 2px solid var(--bg);
+    box-shadow: 0 0 10px rgba(123,53,232,0.6);
+  }
+  .tnode-dot.big { width: 22px; height: 22px; background: var(--blue); box-shadow: 0 0 16px rgba(77,166,255,0.7); }
+  .tnode-year { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .tnode-users { font-size: 13px; font-weight: 700; }
+  .growth-bottom { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .growth-snap {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px;
+  }
+  .growth-snap .gs-year { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+  .growth-snap .gs-gross { font-size: 22px; font-weight: 800; color: var(--blue); margin-bottom: 4px; }
+  .growth-snap .gs-label { font-size: 12px; color: var(--muted); }
+  .pe-note {
+    background: rgba(123,53,232,0.1); border: 1px solid rgba(123,53,232,0.3); border-radius: 10px;
+    padding: 14px 20px; font-size: 13px; color: var(--purple); font-weight: 600; text-align: center;
+    margin-top: 16px;
+  }
+
+  /* ─── SLIDE 10: TEAM ─── */
+  #s10 .section-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--orange); margin-bottom: 16px; font-weight: 600; }
+  #s10 h2 { font-size: 52px; font-weight: 800; margin-bottom: 36px; letter-spacing: -1px; }
+  .team-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .team-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 24px; display: flex; gap: 18px; align-items: flex-start;
+  }
+  .team-avatar {
+    width: 56px; height: 56px; border-radius: 14px; flex-shrink: 0;
+    background: var(--grad); display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 900; color: white;
+  }
+  .team-info h4 { font-size: 17px; font-weight: 800; margin-bottom: 4px; }
+  .team-info .t-role { font-size: 12px; color: var(--purple); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; margin-bottom: 8px; }
+  .team-info p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* ─── SLIDE 11: INVESTMENT TERMS ─── */
+  #s11 .section-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--purple); margin-bottom: 16px; font-weight: 600; }
+  #s11 h2 { font-size: 52px; font-weight: 800; margin-bottom: 36px; letter-spacing: -1px; }
+  .invest-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .invest-card {
+    border-radius: 20px; padding: 36px; text-align: center;
+  }
+  .invest-card.primary {
+    background: var(--grad); box-shadow: 0 0 60px rgba(123,53,232,0.3);
+  }
+  .invest-card.secondary {
+    background: var(--card); border: 1px solid var(--border);
+  }
+  .invest-card .ic-icon { font-size: 48px; margin-bottom: 16px; display: block; }
+  .invest-card .ic-num { font-size: 52px; font-weight: 900; line-height: 1; margin-bottom: 8px; }
+  .invest-card.secondary .ic-num { color: var(--purple); }
+  .invest-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
+  .invest-card p { font-size: 14px; opacity: 0.8; line-height: 1.6; }
+  .invest-details {
+    grid-column: 1 / -1;
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: 24px 32px; display: flex; gap: 0;
+  }
+  .id-item { flex: 1; text-align: center; }
+  .id-item:not(:last-child) { border-right: 1px solid var(--border); }
+  .id-item .id-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+  .id-item .id-val { font-size: 20px; font-weight: 800; }
+
+  /* ─── SLIDE 12: CLOSE ─── */
+  #s12 {
+    background: radial-gradient(ellipse at center, rgba(123,53,232,0.18) 0%, var(--bg) 70%);
+  }
+  #s12 .slide-inner { text-align: center; }
+  #s12 .close-logo {
+    width: 72px; height: 72px; border-radius: 18px; background: var(--grad);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; font-weight: 900; color: white; margin: 0 auto 28px;
+    box-shadow: 0 0 60px rgba(123,53,232,0.5);
+  }
+  #s12 h2 { font-size: 58px; font-weight: 900; letter-spacing: -1.5px; margin-bottom: 14px; }
+  #s12 h2 span { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  #s12 .close-sub { font-size: 22px; color: var(--muted); margin-bottom: 48px; max-width: 580px; margin-left: auto; margin-right: auto; }
+  #s12 .cta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 700px; margin: 0 auto; }
+  #s12 .cta-box {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 16px; text-align: center;
+  }
+  #s12 .cta-box .cb-icon { font-size: 28px; margin-bottom: 10px; display: block; }
+  #s12 .cta-box h4 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  #s12 .cta-box p { font-size: 12px; color: var(--muted); }
+
+  /* General helpers */
+  .section-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 16px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="deck">
+
+  <!-- SLIDE 1: TITLE -->
+  <div class="slide active" id="s1">
+    <div class="slide-inner">
+      <div class="logo-mark">R</div>
+      <h1>RE Connect</h1>
+      <p class="tagline">Where connecting with like-minded people is easier.</p>
+      <div class="badges">
+        <span class="badge hot">Seed Round</span>
+        <span class="badge">Real Estate Tech</span>
+        <span class="badge">10M+ TAM</span>
+        <span class="badge">Invite-Only Platform</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: PROBLEM -->
+  <div class="slide" id="s2">
+    <div class="slide-inner">
+      <div class="section-label" style="color:var(--orange)">The Problem</div>
+      <h2>Real estate networking is <span>broken.</span></h2>
+      <div class="pain-grid">
+        <div class="pain-card">
+          <span class="pain-icon">🤖</span>
+          <h3>Bots &amp; Noise</h3>
+          <p>Facebook, LinkedIn, Instagram and X are flooded with bots, making genuine connections nearly impossible to find.</p>
+        </div>
+        <div class="pain-card">
+          <span class="pain-icon">📥</span>
+          <h3>Message Black Hole</h3>
+          <p>Outreach gets buried in message request queues alongside 100 other messages — seen days later, if at all.</p>
+        </div>
+        <div class="pain-card">
+          <span class="pain-icon">🔍</span>
+          <h3>No Targeted Search</h3>
+          <p>Existing platforms weren't built for real estate. Finding operators, capital partners, or asset-specific connections takes hours.</p>
+        </div>
+        <div class="pain-card">
+          <span class="pain-icon">🤝</span>
+          <h3>No Accountability</h3>
+          <p>No responsiveness signals. No way to know who's serious. Ghost rates are high and time is wasted on unqualified contacts.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: SOLUTION -->
+  <div class="slide" id="s3">
+    <div class="slide-inner">
+      <div class="section-label" style="color:var(--purple)">The Solution</div>
+      <h2>Intentional networking, built for real estate.</h2>
+      <p class="sub">RE Connect is the invite-only platform where operators and capital partners connect and close deals.</p>
+      <div class="feat-row">
+        <div class="feat-card">
+          <span class="feat-icon">🧠</span>
+          <h4>Smart Profiles</h4>
+          <p>Investor role, experience level, primary market, and summary — all in one place.</p>
+        </div>
+        <div class="feat-card">
+          <span class="feat-icon">⭐</span>
+          <h4>Responsive Score</h4>
+          <p>A live score that rewards engagement and filters out time-wasters automatically.</p>
+        </div>
+        <div class="feat-card">
+          <span class="feat-icon">🗺️</span>
+          <h4>Map + Filters</h4>
+          <p>Filter by location and asset class to instantly find exactly who you need.</p>
+        </div>
+        <div class="feat-card">
+          <span class="feat-icon">🔒</span>
+          <h4>Invite-Only Access</h4>
+          <p>Curated network keeps quality high and noise low from day one.</p>
+        </div>
+        <div class="feat-card">
+          <span class="feat-icon">💼</span>
+          <h4>Deal-Focused</h4>
+          <p>Connects operators and capital partners specifically to take down deals together.</p>
+        </div>
+        <div class="feat-card">
+          <span class="feat-icon">📱</span>
+          <h4>Mobile-First</h4>
+          <p>Built for real estate professionals on the move, anytime, anywhere.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: HOW IT WORKS -->
+  <div class="slide" id="s4">
+    <div class="slide-inner">
+      <div class="section-label" style="color:var(--blue)">How It Works</div>
+      <h2>From signup to deal — in four steps.</h2>
+      <div class="step-flow">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <h4>Get Invited</h4>
+          <p>Join via invite only. No bots, no spam, no noise from day one.</p>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <h4>Build Your Profile</h4>
+          <p>Set your role, experience, market, and asset class focus.</p>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <h4>Discover &amp; Connect</h4>
+          <p>Use the map and filters to find operators or capital partners in your market.</p>
+        </div>
+        <div class="step-item">
+          <div class="step-num">4</div>
+          <h4>Close Deals</h4>
+          <p>Build relationships that lead to real transactions, faster.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: MARKET -->
+  <div class="slide" id="s5">
+    <div class="slide-inner">
+      <div class="section-label" style="color:var(--orange)">Market Opportunity</div>
+      <h2>A massive, underserved market.</h2>
+      <div class="market-layout">
+        <div class="big-stat">
+          <div class="num">10M+</div>
+          <div class="label">Individual &amp; small RE investing businesses in the U.S.<br><span style="font-size:14px;opacity:0.6">(Excludes large institutions)</span></div>
+        </div>
+        <div class="market-points">
+          <div class="market-point">
+            <span class="mp-icon">📈</span>
+            <div>
+              <h4>Fragmented &amp; Underserved</h4>
+              <p>No dedicated platform exists for serious individual RE investors to network at scale.</p>
+            </div>
+          </div>
+          <div class="market-point">
+            <span class="mp-icon">💰</span>
+            <div>
+              <h4>High-Value Users</h4>
+              <p>RE investors transact in the millions. A platform fee is trivial compared to deal value.</p>
+            </div>
+          </div>
+          <div class="market-point">
+            <span class="mp-icon">🚀</span>
+            <div>
+              <h4>First-Mover Advantage</h4>
+              <p>No invite-only, deal-focused competitor exists today. The window is open now.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: BUSINESS MODEL -->
+  <div class="slide" id="s6">
+    <div class="slide-inner">
+      <div class="section-label" style="color:var(--purple)">Business Model</div>
+      <h2>Simple, recurring, scalable revenue.</h2>
+      <div class="model-grid">
+        <div class="model-card">
+          <span class="mc-icon">💳</span>
+          <h3>Subscription Revenue</h3>
+          <div class="mc-price">$10/mo</div>
+          <p>Per-user monthly subscription. Every new member adds direct, predictable recurring revenue to the platform.</p>
+        </div>
+        <div class="model-card">
+          <span class="mc-icon">📊</span>
+          <h3>Unit Economics</h3>
+          <div class="mc-price">$120/yr</div>
+          <p>Annual revenue per user. Low churn expected — RE investors need their network year-round, deal after deal.</p>
+        </div>
+        <div class="model-card">
+          <span class="mc-icon">⚙️</span>
+          <h3>Lean Operating Costs</h3>
+          <div class="mc-price">$0.05</div>
+          <p>Management cost per user per month. Highly scalable infrastructure keeps margins strong as we grow.</p>
+        </div>
+        <div class="model-card">
+          <span class="mc-icon">🏦</span>
+          <h3>Platform Distribution</h3>
+          <div class="mc-price">App Store</div>
+          <p>Available on iOS. Apple App Store distribution gives immediate access to millions of potential users globally.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: YEAR 1 -->
+  <div class="slide" id="s7">
+    <div class="slide-inner">
+      <div class="section-label" style="color:var(--orange)">Financials</div>
+      <h2>Year 1 Projections</h2>
+      <div class="year-sub">Conservative targets. Fully achievable.</div>
+      <div class="fin-grid">
+        <div class="fin-box">
+          <div class="fb-label">Users</div>
+          <div class="fb-val">3,000</div>
+        </div>
+        <div class="fin-box">
+          <div class="fb-label">Gross Revenue</div>
+          <div class="fb-val">$360K</div>
+        </div>
+        <div class="fin-box highlight">
+          <div class="fb-label">EBITDA</div>
+          <div class="fb-val">$179.9K</div>
+        </div>
+        <div class="fin-box highlight">
+          <div class="fb-label">Net Profit</div>
+          <div class="fb-val">$107.9K</div>
+        </div>
+      </div>
+      <div class="fin-breakdown">
+        <div class="fb-item">
+          <div class="fbi-label">Apple Store Cut (30%)</div>
+          <div class="fbi-val">$108K</div>
+        </div>
+        <div class="fin-divider"></div>
+        <div class="fb-item">
+          <div class="fbi-label">Marketing (20%)</div>
+          <div class="fbi-val">$72K</div>
+        </div>
+        <div class="fin-divider"></div>
+        <div class="fb-item">
+          <div class="fbi-label">App Management</div>
+          <div class="fbi-val">$150</div>
+        </div>
+        <div class="fin-divider"></div>
+        <div class="fb-item">
+          <div class="fbi-label">Investor Equity (2%)</div>
+          <div class="fbi-val" style="color:var(--orange)">$7,200</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: YEAR 2 -->
+  <div class="slide" id="s8">
+    <div class="slide-inner">
+      <div class="section-label" style="color:var(--blue)">Financials</div>
+      <h2>Year 2 Projections</h2>
+      <div class="year-sub">3.3× user growth. Valuation inflection point.</div>
+      <div class="y2-layout">
+        <div class="y2-left">
+          <div class="y2-stat">
+            <span class="ys-label">Users</span>
+            <span class="ys-val">10,000</span>
+          </div>
+          <div class="y2-stat">
+            <span class="ys-label">Gross Revenue</span>
+            <span class="ys-val">$1.2M</span>
+          </div>
+          <div class="y2-stat">
+            <span class="ys-label">Apple Cost</span>
+            <span class="ys-val">$360K</span>
+          </div>
+          <div class="y2-stat">
+            <span class="ys-label">Marketing</span>
+            <span class="ys-val">$240K/yr</span>
+          </div>
+          <div class="y2-stat green">
+            <span class="ys-label">EBITDA</span>
+            <span class="ys-val">$594K</span>
+          </div>
+          <div class="y2-stat green">
+            <span class="ys-label">Net Profit</span>
+            <span class="ys-val">$354K</span>
+          </div>
+        </div>
+        <div class="y2-right">
+          <h3>📊 Company Valuation at Exit</h3>
+          <div class="val-row">
+            <span class="vr-x">3× Multiple</span>
+            <span class="vr-val">$1,062,000</span>
+          </div>
+          <div style="height:1px;background:rgba(123,53,232,0.2);margin:4px 0;"></div>
+          <div class="val-row">
+            <span class="vr-x">4× Multiple</span>
+            <span class="vr-val">$1,416,000</span>
+          </div>
+          <div style="margin-top:16px;padding:16px;background:rgba(0,0,0,0.3);border-radius:12px;font-size:13px;color:var(--muted);line-height:1.6;">
+            Private equity consistently pays premium multiples for scalable SaaS-style platforms with strong retention metrics.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: GROWTH TRAJECTORY -->
+  <div class="slide" id="s9">
+    <div class="slide-inner">
+      <div class="section-label" style="color:var(--purple)">Growth Roadmap</div>
+      <h2>A path to 12M+ users by 2035.</h2>
+      <div class="timeline-wrap">
+        <div class="timeline-line"></div>
+        <div class="timeline-nodes">
+          <div class="tnode">
+            <div class="tnode-year">May 2026</div>
+            <div class="tnode-dot"></div>
+            <div class="tnode-users">Launch</div>
+          </div>
+          <div class="tnode">
+            <div class="tnode-year">Dec 2026</div>
+            <div class="tnode-dot"></div>
+            <div class="tnode-users">4,800</div>
+          </div>
+          <div class="tnode">
+            <div class="tnode-year">Dec 2027</div>
+            <div class="tnode-dot"></div>
+            <div class="tnode-users">24,000</div>
+          </div>
+          <div class="tnode">
+            <div class="tnode-year">Dec 2028</div>
+            <div class="tnode-dot"></div>
+            <div class="tnode-users">36,000</div>
+          </div>
+          <div class="tnode">
+            <div class="tnode-year">Dec 2030</div>
+            <div class="tnode-dot"></div>
+            <div class="tnode-users">120,000</div>
+          </div>
+          <div class="tnode">
+            <div class="tnode-year">Dec 2032</div>
+            <div class="tnode-dot"></div>
+            <div class="tnode-users">480,000</div>
+          </div>
+          <div class="tnode">
+            <div class="tnode-year">Dec 2035</div>
+            <div class="tnode-dot big"></div>
+            <div class="tnode-users" style="color:var(--blue)">12M+</div>
+          </div>
+        </div>
+      </div>
+      <div class="growth-bottom">
+        <div class="growth-snap">
+          <div class="gs-year">2030 Snapshot</div>
+          <div class="gs-gross">$6M Gross</div>
+          <div class="gs-label">Apple $1.8M · Marketing $600K · Mgmt $30K</div>
+        </div>
+        <div class="growth-snap">
+          <div class="gs-year">2035 Snapshot</div>
+          <div class="gs-gross">$120M Gross</div>
+          <div class="gs-label">Apple $36M · Marketing $12M · Mgmt $50K</div>
+        </div>
+        <div class="growth-snap" style="border-color:rgba(123,53,232,0.3);background:rgba(123,53,232,0.08)">
+          <div class="gs-year">10% Market Capture</div>
+          <div class="gs-gross" style="color:var(--purple)">Billions</div>
+          <div class="gs-label">PE valuation at 12M+ user scale</div>
+        </div>
+      </div>
+      <div class="pe-note">⚡ Private equity tends to pay billions for apps at 12M+ user scale — RE Connect is built for that exit.</div>
+    </div>
+  </div>
+
+  <!-- SLIDE 10: TEAM -->
+  <div class="slide" id="s10">
+    <div class="slide-inner">
+      <div class="section-label" style="color:var(--orange)">The Team</div>
+      <h2>Operators, investors, and builders.</h2>
+      <div class="team-grid">
+        <div class="team-card">
+          <div class="team-avatar">TR</div>
+          <div class="team-info">
+            <h4>Tyler Ruff</h4>
+            <div class="t-role">Co-Founder · Operator · CRE Investor</div>
+            <p>Commercial RE investor &amp; entrepreneur. Built an ice vending business from scratch. Disciplined underwriter with a hands-on, cost-conscious mindset.</p>
+          </div>
+        </div>
+        <div class="team-card">
+          <div class="team-avatar">ZW</div>
+          <div class="team-info">
+            <h4>Zane Wagner</h4>
+            <div class="t-role">Co-Founder · Operator · CRE Investor</div>
+            <p>6+ years in grading, landscaping &amp; business operations. Blends field execution with commercial RE acumen to drive long-term value.</p>
+          </div>
+        </div>
+        <div class="team-card">
+          <div class="team-avatar">RD</div>
+          <div class="team-info">
+            <h4>Ryan Dumas</h4>
+            <div class="t-role">Capital Advisor · Strategic Connector</div>
+            <p>11+ years in commercial lending. $200M+ financed across multiple asset classes. Scaled an insurance company from $3M to $10M+ EBITDA.</p>
+          </div>
+        </div>
+        <div class="team-card">
+          <div class="team-avatar">JM</div>
+          <div class="team-info">
+            <h4>Jeffrey Moreno</h4>
+            <div class="t-role">Lead Product Architect</div>
+            <p>High-velocity engineer shipping enterprise-grade apps at startup speed. Built platforms for Hola Miami &amp; culinary star Eitan Bernath.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 11: INVESTMENT -->
+  <div class="slide" id="s11">
+    <div class="slide-inner">
+      <div class="section-label" style="color:var(--purple)">Investment Terms</div>
+      <h2>Simple terms. Meaningful upside.</h2>
+      <div class="invest-layout">
+        <div class="invest-card primary">
+          <span class="ic-icon">🎯</span>
+          <div class="ic-num">$100K</div>
+          <h3>Total Raise</h3>
+          <p>To build and advertise the app. Founders have already committed $25K of personal capital.</p>
+        </div>
+        <div class="invest-card secondary">
+          <span class="ic-icon">💎</span>
+          <div class="ic-num">2%</div>
+          <h3>Equity per $10K</h3>
+          <p>Minimum investment is $10,000. Each $10K invested receives 2% equity in RE Connect.</p>
+        </div>
+        <div class="invest-details">
+          <div class="id-item">
+            <div class="id-label">Min. Investment</div>
+            <div class="id-val">$10,000</div>
+          </div>
+          <div class="id-item">
+            <div class="id-label">Equity per Unit</div>
+            <div class="id-val" style="color:var(--purple)">2%</div>
+          </div>
+          <div class="id-item">
+            <div class="id-label">Founders Invested</div>
+            <div class="id-val">$25,000</div>
+          </div>
+          <div class="id-item">
+            <div class="id-label">Y2 Valuation (4×)</div>
+            <div class="id-val" style="color:var(--orange)">$1.4M+</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 12: CLOSE -->
+  <div class="slide" id="s12">
+    <div class="slide-inner">
+      <div class="close-logo">R</div>
+      <h2>Join us in building <span>the LinkedIn for real estate.</span></h2>
+      <p class="close-sub">10 million potential users. No real competitor. A founder team that's been in the trenches.</p>
+      <div class="cta-grid">
+        <div class="cta-box">
+          <span class="cb-icon">📩</span>
+          <h4>Get In Touch</h4>
+          <p>Ready to learn more? Reach out to schedule a deeper conversation.</p>
+        </div>
+        <div class="cta-box">
+          <span class="cb-icon">📋</span>
+          <h4>Review Docs</h4>
+          <p>Full financial model, cap table, and legal docs available on request.</p>
+        </div>
+        <div class="cta-box">
+          <span class="cb-icon">🚀</span>
+          <h4>Invest Now</h4>
+          <p>Min. $10K · 2% equity. Limited spots available in this round.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /deck -->
+
+<!-- NAV -->
+<div class="nav">
+  <button class="nav-btn" id="prevBtn" onclick="navigate(-1)">←</button>
+  <span class="counter" id="counter">1 / 12</span>
+  <button class="nav-btn" id="nextBtn" onclick="navigate(1)">→</button>
+</div>
+
+<script>
+  let current = 0;
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+
+  function navigate(dir) {
+    slides[current].classList.remove('active');
+    current = Math.max(0, Math.min(total - 1, current + dir));
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = (current + 1) + ' / ' + total;
+    document.getElementById('progressBar').style.width = ((current + 1) / total * 100) + '%';
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') navigate(-1);
+  });
+
+  // Init progress bar
+  document.getElementById('progressBar').style.width = (1 / total * 100) + '%';
+</script>
+</body>
+</html>
